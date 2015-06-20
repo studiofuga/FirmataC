@@ -216,6 +216,24 @@ void		firmata_endParse(t_firmata *firmata)
     return;
   }
 
+  s_callback_registration *reg = firmata->callbacks;
+  while (reg != 0) {
+    if (reg->msg_type == firmata->parse_buff[0]) {
+      if (reg->handler != 0) {
+        reg->handler(firmata->parse_count-1, firmata->parse_buff+1);
+        return;
+      }
+    }
+
+    reg = reg->next;
+  }
+	
+	int i;
+	printf("Invalid firmata command: %d\n", firmata->parse_count);
+	for (i = 0; i < firmata->parse_count; ++i)
+		printf(" %02X", firmata->parse_buff[i]);
+	printf("\n");
+	return;
 
 }
 
@@ -300,4 +318,28 @@ int		firmata_digitalWrite(t_firmata *firmata, int pin, int value)
   buff[2] = (port_val >> 7) & 0x7F;
   res = serial_write(firmata->serial, buff, 3);
   return (res);
+}
+
+void 			firmata_register_callback (t_firmata *firmata, int type, firmata_msg_handler handler)
+{
+  s_callback_registration *prev = 0;
+  s_callback_registration *p = firmata->callbacks;
+
+  while (p != 0) {
+    prev = p;
+    p = p->next;
+  }
+
+  s_callback_registration *reg = malloc (sizeof(s_callback_registration));
+  memset (reg, 0, sizeof(*reg));
+
+  reg->msg_type = type;
+  reg->handler = handler;
+  reg->next = 0;
+
+  if (prev == 0) {
+    firmata->callbacks = reg;
+  } else {
+    prev->next = reg;
+  }
 }

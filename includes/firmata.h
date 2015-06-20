@@ -75,6 +75,17 @@ typedef struct		s_pin
   uint32_t		value;
 }			t_pin;
 
+typedef void (*firmata_msg_handler)(int len, char *buf);
+
+struct tag_callback_registration
+{
+  int msg_type;
+  firmata_msg_handler handler;
+  struct tag_callback_registration *next;
+};
+
+typedef struct tag_callback_registration s_callback_registration;
+
 typedef struct		s_firmata
 {
   t_serial		*serial;
@@ -84,6 +95,8 @@ typedef struct		s_firmata
   uint8_t		parse_buff[FIRMATA_MSG_LEN];
   int			isReady;
   char			firmware[140];
+
+  s_callback_registration *callbacks;
 }			t_firmata;
 
 t_firmata		*firmata_new(char *name);
@@ -95,5 +108,6 @@ int			firmata_analogWrite(t_firmata *firmata, int pin, int value);
 int			firmata_pull(t_firmata *firmata);
 void			firmata_parse(t_firmata *firmata, const uint8_t *buf, int len);
 void			firmata_endParse(t_firmata *firmata);
+void 			firmata_register_callback (t_firmata *firmata, int msg_type, firmata_msg_handler handler);
 
 #endif
