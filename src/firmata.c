@@ -34,6 +34,7 @@ t_firmata	*firmata_new(char *name)
       perror("firmata_new::Failed malloc");
       return (NULL);
     }
+  memset(res, 0, sizeof(*res));
   res->serial = serial_new();
   if (!res->serial)
     {
