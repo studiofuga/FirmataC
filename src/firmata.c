@@ -90,8 +90,8 @@ void		firmata_parse(t_firmata *firmata, const uint8_t *buf, int len)
     } else if (*p == FIRMATA_END_SYSEX) {
       firmata->parse_command_len = firmata->parse_count + 1;
     } else if (*p & 0x80) {
-      firmata->parse_command_len = 1;
       firmata->parse_count = 0;
+      firmata->parse_command_len = sizeof(firmata->parse_buff);
     }
     if (firmata->parse_count < (int) sizeof(firmata->parse_buff)) {
       firmata->parse_buff[firmata->parse_count] = (uint8_t) (*p);
